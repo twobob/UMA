@@ -82,6 +82,12 @@ namespace UMA.Editors
 			GUI.Box(boneDropArea, "Drag Bone Transforms here to add their names to the Animated Bone Names.\nSo the power tools will preserve them!");
 			GUILayout.Space(10);
 			AnimatedBoneDropAreaGUI(boneDropArea);
+
+			GUILayout.Space(10);
+			if (GUILayout.Button("Spawn MeshData in Scene", GUILayout.Height(50)))
+			{
+				SpawnMeshFromSlotData();
+			}
         }
 
         private void AnimatedBoneDropAreaGUI(Rect dropArea)
@@ -167,6 +173,27 @@ namespace UMA.Editors
 
             UMASlotProcessingUtil.UpdateSlotData(slot, skinnedMesh, slot.material, null, existingRootBone);
         }
+
+		[ExecuteInEditMode]
+		private void SpawnMeshFromSlotData()
+		{
+			SlotDataAsset slotDataAsset = target as SlotDataAsset;
+
+			GameObject meshObj = new GameObject(slotDataAsset.slotName );
+			GameObject renderer = new GameObject(slotDataAsset.slotName, typeof(SkinnedMeshRenderer));
+			SkinnedMeshRenderer smr = renderer.GetComponent<SkinnedMeshRenderer>();
+			renderer.transform.SetParent(meshObj.transform);
+
+			smr.sharedMesh = new Mesh();
+
+			GameObject newGlobal = new GameObject("Global");
+			newGlobal.transform.parent = meshObj.transform;
+			newGlobal.transform.localPosition = Vector3.zero;
+			newGlobal.transform.localRotation = Quaternion.Euler(90f, 90f, 0f);  
+
+			UMASkeleton skeleton = new UMASkeleton(newGlobal.transform);
+			slotDataAsset.meshData.ApplyDataToUnityMesh(smr, skeleton );
+		}
     }
 }
 #endif
