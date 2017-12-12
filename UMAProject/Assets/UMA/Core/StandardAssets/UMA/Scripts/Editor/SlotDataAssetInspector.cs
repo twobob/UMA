@@ -179,20 +179,55 @@ namespace UMA.Editors
 		{
 			SlotDataAsset slotDataAsset = target as SlotDataAsset;
 
+			//Create the gameobjects and skinned mesh renderer
 			GameObject meshObj = new GameObject(slotDataAsset.slotName );
-			GameObject renderer = new GameObject(slotDataAsset.slotName, typeof(SkinnedMeshRenderer));
-			SkinnedMeshRenderer smr = renderer.GetComponent<SkinnedMeshRenderer>();
-			renderer.transform.SetParent(meshObj.transform);
+			GameObject rendererObj = new GameObject(slotDataAsset.slotName, typeof(SkinnedMeshRenderer));
+			SkinnedMeshRenderer renderer = rendererObj.GetComponent<SkinnedMeshRenderer>();
+			rendererObj.transform.SetParent(meshObj.transform);
 
-			smr.sharedMesh = new Mesh();
+			renderer.sharedMesh = new Mesh();
 
+			//Set up the required Global dummy bone
 			GameObject newGlobal = new GameObject("Global");
 			newGlobal.transform.parent = meshObj.transform;
 			newGlobal.transform.localPosition = Vector3.zero;
-			newGlobal.transform.localRotation = Quaternion.Euler(90f, 90f, 0f);  
-
+			newGlobal.transform.localRotation = Quaternion.Euler(0f, 0f, -90f); 
 			UMASkeleton skeleton = new UMASkeleton(newGlobal.transform);
-			slotDataAsset.meshData.ApplyDataToUnityMesh(smr, skeleton );
+
+			//Build the skeleton bones
+			for(int i = 0; i < slotDataAsset.meshData.umaBoneCount; i++)
+			{
+				skeleton.EnsureBone(slotDataAsset.meshData.umaBones[i]);
+			}
+			skeleton.EnsureBoneHierarchy();
+
+			//Copy the data to the new skinned mesh renderer in the scene
+			Mesh mesh = renderer.sharedMesh;
+			mesh.subMeshCount = 1;
+			mesh.triangles = new int[0];
+			mesh.vertices = slotDataAsset.meshData.vertices;
+			mesh.boneWeights = UMABoneWeight.Convert(slotDataAsset.meshData.boneWeights);
+			mesh.normals = slotDataAsset.meshData.normals;
+			mesh.tangents = slotDataAsset.meshData.tangents;
+			mesh.uv = slotDataAsset.meshData.uv;
+			mesh.uv2 = slotDataAsset.meshData.uv2;
+			mesh.uv3 = slotDataAsset.meshData.uv3;
+			mesh.uv4 = slotDataAsset.meshData.uv4;
+			mesh.colors32 = slotDataAsset.meshData.colors32;
+			mesh.bindposes = slotDataAsset.meshData.bindPoses;
+
+			var subMeshCount = slotDataAsset.meshData.submeshes.Length;
+			mesh.subMeshCount = subMeshCount;
+			for (int i = 0; i < subMeshCount; i++)
+			{
+				mesh.SetTriangles(slotDataAsset.meshData.submeshes[i].triangles, i);
+			}
+
+			renderer.bones = skeleton.HashesToTransforms(slotDataAsset.meshData.boneNameHashes);
+			renderer.rootBone = slotDataAsset.meshData.rootBone;
+
+			mesh.RecalculateBounds();
+			renderer.sharedMesh = mesh;
 		}
     }
 }

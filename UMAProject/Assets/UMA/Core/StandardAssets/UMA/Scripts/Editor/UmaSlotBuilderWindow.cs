@@ -61,7 +61,7 @@ namespace UMA.Editors
 			GUILayout.Label("UMA Slot Builder");
 			GUILayout.Space(20);
 			normalReferenceMesh = EditorGUILayout.ObjectField("Seams Mesh (Optional)  ", normalReferenceMesh, typeof(SkinnedMeshRenderer), false) as SkinnedMeshRenderer;
-	        slotMesh = EditorGUILayout.ObjectField("Slot Mesh  ", slotMesh, typeof(SkinnedMeshRenderer), false) as SkinnedMeshRenderer;
+	        slotMesh = EditorGUILayout.ObjectField("Slot Mesh  ", slotMesh, typeof(SkinnedMeshRenderer), true) as SkinnedMeshRenderer;
 			slotMaterial = EditorGUILayout.ObjectField("UMAMaterial  ", slotMaterial, typeof(UMAMaterial), false) as UMAMaterial;
 	        slotFolder = EditorGUILayout.ObjectField("Slot Destination Folder"  , slotFolder, typeof(UnityEngine.Object), false) as UnityEngine.Object;
 			EnforceFolder(ref slotFolder);

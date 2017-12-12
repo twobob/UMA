@@ -136,6 +136,17 @@ namespace UMA.Editors
 			}
 			else
 			{
+				if (resultingSkinnedMesh == null)
+				{
+					Debug.LogError("ResultingSkinnedMesh is null!");
+					return null;
+				}
+				else if (resultingSkinnedMesh.sharedMesh == null)
+				{
+					Debug.LogError("ResultingSkinnedMesh.sharedMesh is null!");
+					return null;
+				}
+					
 				resultingMesh = (Mesh)GameObject.Instantiate(resultingSkinnedMesh.sharedMesh);
 			}
 
